@@ -10,17 +10,15 @@ from flask_cors import CORS
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 CORS(app)
-# For simplicity, we'll use an in-memory list as a placeholder for a database - this will be replaced with a DBMS solution at a later stage of development but for now, this works just fine.
+
 main_table = []
 admin_list = [
     {"admin1": "password1"},
     {"admin2": "password2"},
     # Add more admins as needed
 ]
-
-user_list = [
-    # Add more users as needed
-]
+#The user_list list is saved and loaded continuously from a CSV file. This ensures that the data is not lost in case of a server crash and also allows the data to be accessible after the event is over.
+user_list = []
 
 # Index constants for user data
 USER_ID_INDEX = 0
@@ -42,9 +40,7 @@ def save_user_data():
         for user in user_list:
             writer.writerow(user)
 
-
 # Call this function after adding a new user
-# Example: save_user_data()
 
 # Function to load user data from a CSV file
 def load_user_data():
@@ -56,10 +52,9 @@ def load_user_data():
     except FileNotFoundError:
         # Handle the case where the file doesn't exist
         pass
-
 # Call this function at the beginning of your script
 # Example: load_user_data()
-load_user_data()
+load_user_data() #We call the function once at the beginning of app execution to load the data in the CSV file into the user_list list.
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -229,12 +224,6 @@ def user_signup():
         return redirect(url_for('user_login'))
 
     return render_template('user_signup.html', message=None)
-
-# Import necessary libraries
-
-# Import necessary libraries
-
-# ... (previous code)
 
 @app.route('/mark_attendance')
 def mark_attendance():
