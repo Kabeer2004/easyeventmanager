@@ -22,7 +22,7 @@ Follow these steps to set up the project locally:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-username/your-event-management-repo.git
+   git clone https://github.com/Kabeer2004/easyeventmanager
    cd your-event-management-repo
 2. Install flask, flask-CORS, csv, qrcode (pillow) and other required libraries using pip.
 3. Run the flask app (app.py). The app will be hosted on port 5000 by default.
