@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Marking System</title>
+    <style>
+        body {
+            background-color: #DCF9FF;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5EE2FF;
+        }
+
+        #scanner-container {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #coupon-count {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        button {
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #483FB8;
+        }
+
+        #qr-video {
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #scan-button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #last-user-id {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Attendance Management</h1>
+    <div id="scanner-container">
+        <video id="qr-video" playsinline></video>
+        <br>
+        <button id="scan-button" onclick="captureAndDecode()">Scan</button>
+    </div>
+    <form id="session-form">
+        <label for="session-name">Session Name:</label>
+        <input type="text" id="session-name" name="session-name" required>
+        <button type="button" onclick="startSession()">Start Session</button>
+    </form>
+    <p id="last-user-id">Last Scanned User ID: <span id="user-id"></span></p>
+    <button onclick="nextScan()">Next Scan</button>
+    <button onclick="backToDashboard()">Back to Dashboard</button>
+    <script>
+        let lastScannedUserId = '';
+        let currentSessionName = '';
+
+        // Function to set the current session name
+        function setSessionName() {
+            currentSessionName = document.getElementById('session-name').value.trim();
+        }
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('qr-video');
+
+                video.srcObject = stream;
+                video.play();
+            } catch (error) {
+                console.error('Error accessing the camera: ', error);
+            }
+        }
+
+        async function captureAndDecode() {
+            const video = document.getElementById('qr-video');
+
+            if (!video.srcObject) {
+                alert('Please grant camera permissions and click "Scan" again.');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Capture a frame from the live video feed
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the captured frame to a Blob
+            const blob = await new Promise((resolve) => {
+                canvas.toBlob(resolve, 'image/png');
+            });
+
+            // Set the session name before calling sendImageToAPI
+            setSessionName();
+
+            // Call sendImageToAPI with the blob
+            if (blob) {
+                sendImageToAPI(blob);
+            }
+        }
+
+
+        async function sendImageToAPI(blob) {
+            const formData = new FormData();
+            formData.append('file', blob, 'image.png');
+
+            try {
+                const response = await fetch('http://api.qrserver.com/v1/read-qr-code/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                // Extract user ID from the decoded QR code
+                const userId = data[0].symbol[0].data;
+
+                // Store the scanned userID
+                lastScannedUserId = userId;
+
+                // Display the scanned userID on the page
+                document.getElementById('user-id').textContent = userId;
+
+                // Check if a session name is entered
+                if (currentSessionName) {
+                    // Call the Flask endpoint to update the respective session CSV file
+                    const updateSessionResponse = await fetch(`/update_session/${currentSessionName}/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // You can add more headers if needed
+                        },
+                    });
+
+                    const updateSessionData = await updateSessionResponse.json();
+                    if (updateSessionData.error) {
+                        alert(updateSessionData.error);
+                    } else {
+                        alert(`User ${userId} marked as present in session "${currentSessionName}"`);
+                    }
+                } else {
+                    alert('Please enter a session name to mark attendance.');
+                }
+            } catch (error) {
+                console.error('Error sending image to API:', error);
+            }
+        }
+
+        function nextScan() {
+            // Reset the video feed
+            document.getElementById('qr-video').srcObject = null;
+
+            // Clear the displayed userID
+            document.getElementById('user-id').textContent = '';
+
+            // Restart the camera
+            startCamera();
+        }
+        
+        async function startSession() {
+            const sessionName = document.getElementById('session-name').value;
+
+            if (!sessionName) {
+                alert('Please enter a session name.');
+                return;
+            }
+
+            // Call a Flask endpoint to create a new session CSV file
+            const response = await fetch(`/start_session/${sessionName}`, {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                alert(`Session "${sessionName}" started. Scan QR codes to mark attendance.`);
+            } else {
+                alert('Error starting the session. Please try again.');
+            }
+        }
+
+        function backToDashboard() {
+            window.location.href = '/admin_dashboard';
+        }
+
+        // Request camera permissions and start the camera when the page loads
+        document.addEventListener('DOMContentLoaded', startCamera);
+
+        // Function to handle the "Scan" button click
+        document.getElementById('scan-button').addEventListener('click', async () => {
+            const blob = await captureAndDecode();
+            if (blob) {
+                sendImageToAPI(blob);
+            }
+        });
+    </script>
+</body>
+</html>

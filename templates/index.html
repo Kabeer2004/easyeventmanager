@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome!</title>
+    <style>
+        body {
+            position: relative;
+            background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+            background-size: cover;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.75);
+        }
+
+        h1 {
+            position: relative;
+            z-index: 1;
+            color: #5EE2FF; /* Set a specific color for the heading text */
+        }
+
+        button {
+            position: relative;
+            z-index: 1;
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #483FB8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login</h1>
+    <a href="{{ url_for('admin_login') }}"><button>Admin Login</button></a>
+    <a href="{{ url_for('user_login') }}"><button>User Login</button></a>
+</body>
+</html>

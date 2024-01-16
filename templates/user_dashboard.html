@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            background-color: #DCF9FF;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5EE2FF;
+        }
+
+        p {
+            color: #5EE2FF;
+            font-size: 18px;
+        }
+
+        button {
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #483FB8;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Dashboard</h1>
+    <p>Name: {{ name }}</p>
+    <p>Username: {{ username }}</p>
+    <p>User ID: {{ user_id }}</p>
+    <p>Food Coupons Remaining: {{ foodcoups }}</p>
+    <!-- Display the QR code -->
+    <img src="{{ url_for('static', filename='qrcode.png') }}" alt="QR Code">
+    <br>
+    <a href="{{ url_for('logout') }}"><button>Logout</button></a>
+</body>
+</html>

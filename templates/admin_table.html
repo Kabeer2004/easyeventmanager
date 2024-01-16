@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready( function () {
+            $('#mainTable').DataTable();
+        } );
+    </script>
+    <style>
+        body {
+            background-color: #DCF9FF;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5EE2FF;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #5EE2FF;
+        }
+
+        th {
+            background-color: #5B55D3;
+            color: white;
+        }
+
+        a button {
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none; /* Remove underline from links */
+        }
+
+        a button:hover {
+            background-color: #483FB8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <table id="mainTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile Number</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Coupons Remaining</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+                <tr>
+                    <td>{{ row['id'] }}</td>
+                    <td>{{ row['user_id'] }}</td>
+                    <td>{{ row['name'] }}</td>
+                    <td>{{ row['email'] }}</td>
+                    <td>{{ row['mobile'] }}</td>
+                    <td>{{ row['username'] }}</td>
+                    <td>{{ row['password'] }}</td>
+                    <td>{{ row['coupons_remaining'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('admin_dashboard') }}"><button>Return to Admin Dashboard</button></a>
+</body>
+</html>

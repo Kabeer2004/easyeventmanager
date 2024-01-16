@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            background-color: #DCF9FF;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5EE2FF;
+        }
+
+        button {
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #483FB8;
+        }
+
+        center {
+            margin: 10px;
+            color: #5EE2FF;
+        }
+
+        bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1>Admin Menu</h1>
+        <a href="{{ url_for('admin_table') }}"><button>View Attendees</button></a>
+        <a href="{{ url_for('mark_attendance') }}"><button>Mark Attendance</button></a>
+        <a href="{{ url_for('manage_food_coupons') }}"><button>Manage Food Coupons</button></a>
+    </center>
+    <a href="{{ url_for('logout') }}"><button>Logout</button></a>
+</body>
+</html>

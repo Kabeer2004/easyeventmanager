@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <style>
+        body {
+            background-color: #DCF9FF;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5EE2FF;
+        }
+
+        label {
+            margin-bottom: 8px;
+            display: block;
+            color: #5EE2FF;
+        }
+
+        input {
+            padding: 8px;
+            margin-bottom: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #483FB8;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Login</h1>
+    <form action="/user_login" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+    <a href="{{ url_for('user_signup') }}"><button>Don't have an account? Sign up here.</button></a>
+    <a href="{{ url_for('index') }}"><button>Return to Home Page</button></a>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Coupon Management</title>
+    <style>
+        body {
+            background-color: #DCF9FF;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5EE2FF;
+        }
+
+        #scanner-container {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #coupon-count {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        button {
+            background-color: #5B55D3;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #483FB8;
+        }
+
+        #qr-video {
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #scan-button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #last-user-id {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Food Coupon Management</h1>
+    <div id="scanner-container">
+        <video id="qr-video" playsinline></video>
+        <br>
+        <button id="scan-button" onclick="captureAndDecode()">Scan</button>
+    </div>
+    <p id="coupon-count">Coupons Remaining: <span id="remaining-count">{{ foodcoups }}</span></p>
+    <button onclick="nextScan()">Next Scan</button>
+    <p id="last-user-id">Last Scanned User ID: <span id="user-id"></span></p>
+    <button onclick="backToDashboard()">Back to Dashboard</button>
+
+    <script>
+        let lastScannedUserId = '';
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('qr-video');
+
+                video.srcObject = stream;
+                video.play();
+            } catch (error) {
+                console.error('Error accessing the camera: ', error);
+            }
+        }
+
+        async function captureAndDecode() {
+            const video = document.getElementById('qr-video');
+
+            if (!video.srcObject) {
+                alert('Please grant camera permissions and click "Scan" again.');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Capture a frame from the live video feed
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the captured frame to a Blob
+            return new Promise((resolve) => {
+                canvas.toBlob(resolve, 'image/png');
+            });
+        }
+
+        async function sendImageToAPI(blob) {
+            const formData = new FormData();
+            formData.append('file', blob, 'image.png');
+
+            try {
+                const response = await fetch('http://api.qrserver.com/v1/read-qr-code/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                // Extract user ID from the decoded QR code
+                const userId = data[0].symbol[0].data;
+
+                // Store the scanned userID
+                lastScannedUserId = userId;
+
+                // Display the scanned userID on the page
+                document.getElementById('user-id').textContent = userId;
+
+                // Call the /decrement_coupon endpoint with the user ID
+                const decrementResponse = await fetch(`/decrement_coupon/${userId}`, {
+                    method: 'GET',
+                });
+
+                const decrementData = await decrementResponse.json();
+                if (decrementData.error) {
+                    alert(decrementData.error);
+                } else {
+                    // Update the displayed coupon count
+                    document.getElementById('remaining-count').textContent = decrementData.coupons_remaining;
+                }
+            } catch (error) {
+                console.error('Error sending image to API:', error);
+            }
+        }
+
+        function nextScan() {
+            // Reset the video feed
+            document.getElementById('qr-video').srcObject = null;
+
+            // Clear the displayed userID
+            document.getElementById('user-id').textContent = '';
+
+            // Restart the camera
+            startCamera();
+        }
+        
+        function backToDashboard() {
+            window.location.href = '/admin_dashboard';
+        }
+
+        // Request camera permissions and start the camera when the page loads
+        document.addEventListener('DOMContentLoaded', startCamera);
+
+        // Function to handle the "Scan" button click
+        document.getElementById('scan-button').addEventListener('click', async () => {
+            const blob = await captureAndDecode();
+            if (blob) {
+                sendImageToAPI(blob);
+            }
+        });
+    </script>
+</body>
+</html>
